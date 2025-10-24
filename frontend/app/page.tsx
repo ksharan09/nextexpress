@@ -1,65 +1,171 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+
+export default function AuthPage() {
+  // 'student' or 'professor' - Determines which role's form is active
+  const [activeRole, setActiveRole] = useState("student");
+  // true for login, false for signup - Determines if login or signup form is shown
+  const [isLoginView, setIsLoginView] = useState(true);
+
+  // State for form fields
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState(""); // For signup
+
+  // --- Form Submission Handlers ---
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log(`Logging in as ${activeRole}:`, { email, password });
+    alert(`Logging in as ${activeRole} with email: ${email}`);
+    // TODO: Integrate with your backend login API based on `activeRole`
+  };
+
+  const handleSignup = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log(`Signing up as ${activeRole}:`, { fullName, email, password });
+    alert(`Signing up as ${activeRole} with name: ${fullName}, email: ${email}`);
+    // TODO: Integrate with your backend signup API based on `activeRole`
+  };
+
+  // --- Reset form fields when changing view or role ---
+  const resetFormFields = () => {
+    setEmail("");
+    setPassword("");
+    setFullName("");
+  };
+
+  // --- Render Logic for UI ---
+
+  // Decide form title
+  const formTitle = isLoginView
+    ? `Sign In as ${activeRole === "student" ? "Student" : "Professor"}`
+    : `Sign Up as ${activeRole === "student" ? "Student" : "Professor"}`;
+
+  // Decide main action button text
+  const mainButtonText = isLoginView ? "Sign In" : "Sign Up";
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    // Background gradient for a fresh look
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-purple-100 via-blue-100 to-green-100 p-4">
+      
+      {/* --- Main Auth Card --- */}
+      <div className="w-full max-w-md bg-white rounded-xl shadow-2xl p-8 space-y-6 border border-gray-200">
+        
+        {/* --- Header & Role Selection --- */}
+        <div className="text-center">
+          <h1 className="text-4xl font-extrabold text-gray-800 mb-2">CourseHub</h1>
+          <p className="text-lg text-gray-600 mb-6">
+            {isLoginView ? "Access your learning journey" : "Join our community"}
           </p>
+
+          {/* Role selection buttons */}
+          <div className="flex justify-center space-x-4 mb-6">
+            <button
+              onClick={() => { setActiveRole("student"); resetFormFields(); }}
+              className={`px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300
+                ${activeRole === "student"
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+            >
+              Student
+            </button>
+            <button
+              onClick={() => { setActiveRole("professor"); resetFormFields(); }}
+              className={`px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300
+                ${activeRole === "professor"
+                  ? "bg-green-600 text-white shadow-md"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+            >
+              Professor
+            </button>
+          </div>
+
+          <h2 className="text-2xl font-bold text-gray-700">{formTitle}</h2>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        {/* --- Form Section --- */}
+        <form onSubmit={isLoginView ? handleLogin : handleSignup} className="space-y-5">
+          {/* Full Name field (only for Sign Up) */}
+          {!isLoginView && (
+            <div>
+              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+                Full Name
+              </label>
+              <input
+                id="fullName"
+                type="text"
+                placeholder="Enter your full name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              />
+            </div>
+          )}
+
+          {/* Email field */}
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          </div>
+
+          {/* Password field */}
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            />
+          </div>
+
+          {/* Submit button */}
+          <button
+            type="submit"
+            className={`w-full py-2.5 rounded-md text-white text-lg font-semibold transition-all duration-300 shadow-lg
+              ${isLoginView
+                ? (activeRole === "student" ? "bg-blue-600 hover:bg-blue-700" : "bg-green-600 hover:bg-green-700")
+                : (activeRole === "student" ? "bg-blue-600 hover:bg-blue-700" : "bg-green-600 hover:bg-green-700")
+              }`}
           >
-            Documentation
-          </a>
+            {mainButtonText}
+          </button>
+        </form>
+
+        {/* --- Footer Links --- */}
+        <div className="text-center text-sm mt-6">
+          {isLoginView && ( // Only show Forgot Password on Login view
+            <a href="#" className="text-gray-500 hover:text-blue-600 hover:underline transition-colors block mb-2">
+              Forgot password?
+            </a>
+          )}
+          
+          <button
+            onClick={() => { setIsLoginView(!isLoginView); resetFormFields(); }}
+            className="text-gray-600 hover:text-blue-600 hover:underline transition-colors focus:outline-none"
+          >
+            {isLoginView ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
+          </button>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
