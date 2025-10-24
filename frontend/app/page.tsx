@@ -15,21 +15,25 @@ export default function AuthPage() {
 
   // --- Form Submission Handlers ---
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log(`Logging in as ${activeRole}:`, { email, password });
     alert(`Logging in as ${activeRole} with email: ${email}`);
-    // TODO: Integrate with your backend login API based on `activeRole`
+    // TODO: Integrate with your backend login API (e.g., POST to /api/auth/login)
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(`Signing up as ${activeRole}:`, { fullName, email, password });
+    console.log(`Signing up as ${activeRole}:`, {
+      fullName,
+      email,
+      password,
+    });
     alert(`Signing up as ${activeRole} with name: ${fullName}, email: ${email}`);
-    // TODO: Integrate with your backend signup API based on `activeRole`
+    // TODO: Integrate with your backend signup API (e.g., POST to /api/auth/signup)
   };
 
-  // --- Reset form fields when changing view or role ---
+  // --- Helper to reset form fields when toggling ---
   const resetFormFields = () => {
     setEmail("");
     setPassword("");
@@ -38,134 +42,181 @@ export default function AuthPage() {
 
   // --- Render Logic for UI ---
 
-  // Decide form title
-  const formTitle = isLoginView
-    ? `Sign In as ${activeRole === "student" ? "Student" : "Professor"}`
-    : `Sign Up as ${activeRole === "student" ? "Student" : "Professor"}`;
+  // Dynamically set the main title based on view
+  const mainTitle = isLoginView ? "Login to Your Account" : "Create Your Account";
+  
+  // Dynamically set the welcome message based on view
+  const welcomeMessage = isLoginView ? "Welcome Back" : "Get Started";
 
-  // Decide main action button text
-  const mainButtonText = isLoginView ? "Sign In" : "Sign Up";
+  // Dynamically set the form title based on role and view
+  let formTitle = "";
+  if (isLoginView) {
+    formTitle = activeRole === "student" ? "Sign In as Student" : "Sign In as Professor";
+  } else {
+    formTitle = activeRole === "student" ? "Sign Up as Student" : "Sign Up as Professor";
+  }
 
   return (
-    // Background gradient for a fresh look
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-purple-100 via-blue-100 to-green-100 p-4">
-      
-      {/* --- Main Auth Card --- */}
-      <div className="w-full max-w-md bg-white rounded-xl shadow-2xl p-8 space-y-6 border border-gray-200">
-        
-        {/* --- Header & Role Selection --- */}
+    // Main container for the two-column layout
+    <div className="min-h-screen flex">
+      {/* Left Column - Green background */}
+      <div className="hidden lg:flex lg:w-1/2 bg-emerald-800 text-white items-center justify-center p-8">
         <div className="text-center">
-          <h1 className="text-4xl font-extrabold text-gray-800 mb-2">CourseHub</h1>
-          <p className="text-lg text-gray-600 mb-6">
-            {isLoginView ? "Access your learning journey" : "Join our community"}
+          <h1 className="text-5xl font-extrabold mb-4">QUANTUM U</h1>
+          <h2 className="text-2xl font-semibold mb-2">{welcomeMessage}</h2>
+          <p className="text-lg px-8">
+            {isLoginView
+              ? "Sign in to create, discover and connect with the global community"
+              : "Sign up to create, discover and connect with the global community"}
           </p>
+        </div>
+      </div>
 
-          {/* Role selection buttons */}
-          <div className="flex justify-center space-x-4 mb-6">
+      {/* Right Column - White background with form */}
+      <div className="flex-1 flex items-center justify-center bg-white p-8">
+        <div className="w-full max-w-md">
+          <h2 className="text-4xl font-semibold text-gray-800 mb-6">
+            {mainTitle}
+          </h2>
+
+          {/* Role Selection Toggles */}
+          <div className="flex w-full rounded-md bg-gray-100 p-1 mb-6">
             <button
-              onClick={() => { setActiveRole("student"); resetFormFields(); }}
-              className={`px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300
-                ${activeRole === "student"
-                  ? "bg-blue-600 text-white shadow-md"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+              onClick={() => {
+                setActiveRole("student");
+                resetFormFields();
+              }}
+              className={`w-1/2 py-2.5 rounded-md text-lg font-medium transition-all duration-300 ${
+                activeRole === "student"
+                  ? "bg-emerald-700 text-white shadow"
+                  : "text-gray-600 hover:bg-gray-200"
+              }`}
             >
               Student
             </button>
             <button
-              onClick={() => { setActiveRole("professor"); resetFormFields(); }}
-              className={`px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300
-                ${activeRole === "professor"
-                  ? "bg-green-600 text-white shadow-md"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
+              onClick={() => {
+                setActiveRole("professor");
+                resetFormFields();
+              }}
+              className={`w-1/2 py-2.5 rounded-md text-lg font-medium transition-all duration-300 ${
+                activeRole === "professor"
+                  ? "bg-emerald-700 text-white shadow"
+                  : "text-gray-600 hover:bg-gray-200"
+              }`}
             >
               Professor
             </button>
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-700">{formTitle}</h2>
-        </div>
+          <h3 className="text-2xl font-medium text-gray-700 mb-6 text-center">
+            {formTitle}
+          </h3>
 
-        {/* --- Form Section --- */}
-        <form onSubmit={isLoginView ? handleLogin : handleSignup} className="space-y-5">
-          {/* Full Name field (only for Sign Up) */}
-          {!isLoginView && (
+          <form onSubmit={isLoginView ? handleLogin : handleSignup} className="space-y-5">
+            {/* Full Name field (only for Sign Up) */}
+            {!isLoginView && (
+              <div>
+                <label htmlFor="fullName" className="block text-lg text-gray-700 mb-2">
+                  Full Name
+                </label>
+                <input
+                  id="fullName"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500 text-lg"
+                />
+              </div>
+            )}
+
+            {/* Email field */}
             <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name
+              <label htmlFor="email" className="block text-lg text-gray-700 mb-2">
+                Email
               </label>
               <input
-                id="fullName"
-                type="text"
-                placeholder="Enter your full name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500 text-lg"
               />
             </div>
-          )}
 
-          {/* Email field */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
-            </label>
-            <input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-            />
+            {/* Password field */}
+            <div>
+              <label htmlFor="password" className="block text-lg text-gray-700 mb-2">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500 text-lg"
+              />
+              {/* Forgot Password link (only for Sign In) */}
+              {isLoginView && (
+                <div className="text-right mt-2">
+                  <a
+                    href="#"
+                    className="text-emerald-700 hover:underline text-base"
+                  >
+                    Forgot password?
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* Submit button */}
+            <button
+              type="submit"
+              className="w-full py-3.5 rounded-md bg-emerald-800 text-white text-xl font-semibold hover:bg-emerald-700 transition-colors duration-300"
+            >
+              {isLoginView ? "Sign In" : "Sign Up"}
+            </button>
+          </form>
+
+          {/* Toggle between Sign In / Sign Up */}
+          <div className="text-center mt-6">
+            {isLoginView ? (
+              <p className="text-lg text-gray-600">
+                Don't have an account?{" "}
+                <button
+                  onClick={() => {
+                    setIsLoginView(false);
+                    resetFormFields();
+                  }}
+                  className="text-emerald-700 hover:underline font-medium focus:outline-none"
+                >
+                  Sign Up
+                </button>
+              </p>
+            ) : (
+              <p className="text-lg text-gray-600">
+                Already have an account?{" "}
+                <button
+                  onClick={() => {
+                    setIsLoginView(true);
+                    resetFormFields();
+                  }}
+                  className="text-emerald-700 hover:underline font-medium focus:outline-none"
+                >
+                  Sign In
+                </button>
+              </p>
+            )}
           </div>
-
-          {/* Password field */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-            />
-          </div>
-
-          {/* Submit button */}
-          <button
-            type="submit"
-            className={`w-full py-2.5 rounded-md text-white text-lg font-semibold transition-all duration-300 shadow-lg
-              ${isLoginView
-                ? (activeRole === "student" ? "bg-blue-600 hover:bg-blue-700" : "bg-green-600 hover:bg-green-700")
-                : (activeRole === "student" ? "bg-blue-600 hover:bg-blue-700" : "bg-green-600 hover:bg-green-700")
-              }`}
-          >
-            {mainButtonText}
-          </button>
-        </form>
-
-        {/* --- Footer Links --- */}
-        <div className="text-center text-sm mt-6">
-          {isLoginView && ( // Only show Forgot Password on Login view
-            <a href="#" className="text-gray-500 hover:text-blue-600 hover:underline transition-colors block mb-2">
-              Forgot password?
-            </a>
-          )}
-          
-          <button
-            onClick={() => { setIsLoginView(!isLoginView); resetFormFields(); }}
-            className="text-gray-600 hover:text-blue-600 hover:underline transition-colors focus:outline-none"
-          >
-            {isLoginView ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
-          </button>
         </div>
       </div>
     </div>
   );
 }
+
