@@ -201,7 +201,7 @@ export default function AuthPage() {
               </p>
             ) : (
               <p className="text-lg text-gray-600">
-                Already have an account?{" "}
+                Already have a account?{" "}
                 <button
                   onClick={() => {
                     setIsLoginView(true);
