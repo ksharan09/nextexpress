@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 // --- SVG Icon Components ---
-// These are simple inline SVGs for demonstration.
-// For a real project, you might use a library like lucide-react.
-
+// (Keep all the SVG icon components from the previous version here)
 const MenuIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
@@ -36,8 +34,9 @@ const CloseIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+// Updated FeatureIcon to use teal
 const FeatureIcon = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white shadow-lg">
+  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-700 text-white shadow-lg">
     {children}
   </div>
 );
@@ -84,8 +83,6 @@ const MinusIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
   </svg>
 );
-
-// --- Feature Icons ---
 
 const CourseTrackingIcon = () => (
   <svg
@@ -189,294 +186,220 @@ const CloudIcon = () => (
   </svg>
 );
 
-// --- Social Icons ---
-
-const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
+// --- User Dropdown Icon ---
+const UserCircleIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
+    fill="none"
     viewBox="0 0 24 24"
-    fill="currentColor"
+    strokeWidth={1.5}
+    stroke="currentColor"
   >
-    <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
+    />
   </svg>
 );
-
-const TwitterIcon = (props: React.SVGProps<SVGSVGElement>) => (
+const ChevronDownIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
+    fill="none"
     viewBox="0 0 24 24"
-    fill="currentColor"
+    strokeWidth={1.5}
+    stroke="currentColor"
   >
-    <path d="M21.543 7.104c.015.16.015.32.015.48 0 4.9-3.73 10.55-10.55 10.55-2.09 0-4.04-.61-5.68-1.67A7.33 7.33 0 0010.1 14.8c-1.85 0-3.41-1.25-3.95-2.92.26.05.52.07.78.07.38 0 .75-.05 1.1-.15-1.93-.39-3.38-2.1-3.38-4.1v-.05c.57.31 1.21.5 1.89.52C4.82 7.77 4.18 6.6 4.18 5.28c0-.75.2-1.45.55-2.06A7.33 7.33 0 0010.1 7.1a3.9 3.9 0 011.08-3.8A3.7 3.7 0 0115.1 2c1.28 0 2.45.54 3.26 1.4.9-.18 1.75-.5 2.52-1-.3.92-.92 1.7-1.74 2.2.8-.1 1.56-.3 2.28-.6-.55.78-1.25 1.47-2.05 2.06z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
   </svg>
 );
 
-const LinkedInIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    {...props}
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="currentColor"
+// --- Simple Dropdown Component ---
+const DropdownMenu = ({
+  trigger,
+  children,
+}: {
+  trigger: React.ReactNode;
+  children: React.ReactNode;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown if clicked outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button onClick={() => setIsOpen(!isOpen)} className="flex items-center">
+        {trigger}
+      </button>
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const DropdownMenuItem = ({
+  children,
+  onClick,
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+}) => (
+  <button
+    onClick={onClick}
+    className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
   >
-    <path d="M22.23 0H1.77C.79 0 0 .79 0 1.77v20.46C0 23.21.79 24 1.77 24h20.46c.98 0 1.77-.79 1.77-1.77V1.77C24 .79 23.21 0 22.23 0zM7.06 20.45H3.53V9h3.53v11.45zM5.29 7.43c-1.11 0-2.01-.9-2.01-2.01s.9-2.01 2.01-2.01 2.01.9 2.01 2.01-.9 2.01-2.01 2.01zM20.45 20.45h-3.53v-5.54c0-1.32-.02-3.02-1.84-3.02-1.84 0-2.12 1.44-2.12 2.93v5.63h-3.53V9h3.39v1.56h.05c.47-.89 1.62-1.84 3.34-1.84 3.58 0 4.24 2.36 4.24 5.43v6.3z" />
-  </svg>
+    {children}
+  </button>
 );
+
 
 // --- Main Page Component ---
 
-export default function LandingPage() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeFaq, setActiveFaq] = useState<number | null>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
+export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login state
 
-  // --- Animation Styles ---
-  // We add this <style> tag to define custom animations
-  // that Tailwind can then use.
-  const animationStyle = `
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .animate-fadeInUp {
-      animation: fadeInUp 0.5s ease-out forwards;
-    }
-
-    /* Simple utility to apply animation with a delay */
-    .delay-100 { animation-delay: 0.1s; }
-    .delay-200 { animation-delay: 0.2s; }
-    .delay-300 { animation-delay: 0.3s; }
-    .delay-400 { animation-delay: 0.4s; }
-    .delay-500 { animation-delay: 0.5s; }
-  `;
-
-  // --- Data for Sections ---
-  const navLinks = [
-    { name: "Home", href: "#home" },
-    { name: "Features", href: "#features" },
-    { name: "About", href: "#about" },
-    { name: "FAQ", href: "#faq" },
-    { name: "Contact", href: "#contact" },
-  ];
-
-  const features = [
-    {
-      name: "Course Tracking",
-      description:
-        "Monitor student progress and course milestones with our intuitive tracking system.",
-      icon: <CourseTrackingIcon />,
-    },
-    {
-      name: "Instructor Dashboard",
-      description:
-        "A dedicated dashboard for instructors to manage courses, students, and content.",
-      icon: <DashboardIcon />,
-    },
-    {
-      name: "Student Analytics",
-      description:
-        "Gain valuable insights into student performance and engagement with detailed analytics.",
-      icon: <AnalyticsIcon />,
-    },
-    {
-      name: "Assignment & Grading",
-      description:
-        "Streamline the entire assignment and grading process, from submission to feedback.",
-      icon: <GradingIcon />,
-    },
-    {
-      name: "Real-time Notifications",
-      description:
-        "Keep everyone informed with instant notifications for announcements, grades, and more.",
-      icon: <NotificationIcon />,
-    },
-    {
-      name: "Cloud-based Access",
-      description:
-        "Access your courses, materials, and data securely from anywhere, on any device.",
-      icon: <CloudIcon />,
-    },
-  ];
-
-  
-
-  const faqs = [
-    {
-      question: "Is there a free trial available?",
-      answer:
-        "Yes, we offer a 14-day free trial on our Basic and Pro plans. You can sign up without a credit card and explore all the features.",
-    },
-    {
-      question: "Can I switch plans later?",
-      answer:
-        "Absolutely. You can upgrade, downgrade, or cancel your plan at any time from your account dashboard. Changes will be pro-rated.",
-    },
-    {
-      question: "What kind of support do you offer?",
-      answer:
-        "We offer email support on all plans. Our Pro and Enterprise plans include priority support via chat and phone, as well as dedicated account managers for Enterprise clients.",
-    },
-    {
-      question: "Is my data secure?",
-      answer:
-        "Security is our top priority. We use industry-standard encryption, secure cloud infrastructure, and regular backups to ensure your data is always safe and protected.",
-    },
-    {
-      question: "Can I customize the platform with my own branding?",
-      answer:
-        "Yes! Our Pro and Enterprise plans allow you to use your own domain name, logo, and custom branding colors to create a seamless experience for your students.",
-    },
-  ];
-
-  // --- Event Handlers ---
-
-  const handleFaqToggle = (index: number) => {
-    setActiveFaq(activeFaq === index ? null : index);
+  // Simulate login
+  const handleLogin = () => {
+    console.log("Simulating Login...");
+    setIsLoggedIn(true);
   };
 
-  const handleFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  // Simulate logout
+  const handleLogout = () => {
+    console.log("Simulating Logout...");
+    setIsLoggedIn(false);
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Contact Form Submitted:", formData);
-    alert("Message sent! We'll get back to you soon.");
-    // Reset form
-    setFormData({ name: "", email: "", message: "" });
-  };
+  // --- Stats Section Component ---
+  const StatsSection = () => {
+    const stats = [
+      { count: "200+", label: "Courses" },
+      { count: "50+", label: "Professors" },
+      { count: "900+", label: "Students", highlight: true }, // Highlight this one
+      { count: "10+", label: "AI Avatar" },
+      { count: "9+", label: "different Voices" },
+      { count: "12+", label: "Languages" },
+    ];
 
-  return (
-    <>
-      {/* --- Style tag for animations --- */}
-      <style>{animationStyle}</style>
-
-      {/* --- Main Container --- */}
-      <div className="flex min-h-screen w-full flex-col bg-white text-gray-800">
-        
-        {/* --- Header & Navigation (Colorful & Centered) --- */}
-        <header
-          id="home"
-          className="sticky top-0 z-50 w-full bg-gradient-to-r from-blue-700 to-purple-800 text-white shadow-lg"
-        >
-          <nav className="container mx-auto flex h-20 flex-wrap items-center justify-between px-4 md:flex-nowrap">
-            {/* Logo */}
-            <a
-              href="#home"
-              className="text-2xl font-bold transition-transform hover:scale-105"
-            >
-              Quantum UI
-            </a>
-
-            {/* Desktop Nav (Centered) */}
-            <div className="absolute left-1/2 hidden -translate-x-1/2 md:flex md:space-x-2">
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  className="rounded-lg px-3 py-2 text-sm font-medium text-gray-200 transition-colors hover:bg-white/10 hover:text-white"
-                >
-                  {link.name}
-                </a>
-              ))}
-            </div>
-
-            {/* Desktop Sign In / Sign Up */}
-            <div className="hidden items-center space-x-4 md:flex">
-              <a
-                href="#" // Update this to your login page path, e.g., /login
-                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-200 transition-colors hover:bg-white/10 hover:text-white"
+    return (
+      <section className="bg-white py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto mb-16 max-w-3xl text-center">
+            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+              Our Achievements
+            </h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Numbers that speak for themselves, showcasing our commitment to excellence.
+            </p>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            {stats.map((stat, index) => (
+              <div
+                key={index}
+                className={`flex flex-col items-center justify-center rounded-xl p-6 shadow-sm transition-all duration-300 ${
+                  stat.highlight ? "bg-teal-950 text-white" : "bg-gray-50 text-gray-900 hover:bg-gray-100"
+                }`}
               >
-                Sign In
-              </a>
-              <a
-                href="#" // Update this to your sign-up page path
-                className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-blue-700 shadow-md transition-all hover:bg-gray-100 hover:shadow-lg"
-              >
-                Sign Up
-              </a>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <div className="md:hidden">
-              <button
-                onClick={() => setIsMenuOpen(true)}
-                className="rounded-md p-2 text-gray-200 transition-colors hover:bg-white/10"
-                aria-label="Open menu"
-              >
-                <MenuIcon className="h-6 w-6" />
-              </button>
-            </div>
-          </nav>
-
-          {/* --- Mobile Menu --- */}
-          {isMenuOpen && (
-            <div className="fixed inset-0 z-50 flex flex-col bg-gradient-to-r from-blue-700 to-purple-800 p-4 text-white md:hidden">
-              <div className="flex items-center justify-between">
-                <a href="#home" className="text-2xl font-bold">
-                  Quantum UI
-                </a>
-                <button
-                  onClick={() => setIsMenuOpen(false)}
-                  className="rounded-md p-2 text-gray-200 transition-colors hover:bg-white/10"
-                  aria-label="Close menu"
-                >
-                  <CloseIcon className="h-6 w-6" />
-                </button>
+                <p className="text-5xl font-extrabold">{stat.count}</p>
+                <p className={`mt-2 text-lg font-medium ${stat.highlight ? "text-gray-300" : "text-gray-600"}`}>
+                  {stat.label}
+                </p>
               </div>
-              <div className="mt-6 flex flex-col space-y-4">
-                {navLinks.map((link) => (
-                  <a
-                    key={link.name}
-                    href={link.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className="rounded-lg px-4 py-3 text-lg font-medium text-gray-200 transition-colors hover:bg-white/10"
-                  >
-                    {link.name}
-                  </a>
-                ))}
-                
-                {/* Mobile Sign In / Sign Up */}
-                <div className="border-t border-white/20 pt-4">
-                  <a
-                    href="#" // Update this to your login page path
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block rounded-lg px-4 py-3 text-lg font-medium text-gray-200 transition-colors hover:bg-white/10"
-                  >
-                    Sign In
-                  </a>
-                  <a
-                    href="#" // Update this to your sign-up page path
-                    onClick={() => setIsMenuOpen(false)}
-                    className="mt-2 block w-full rounded-full bg-white px-5 py-3 text-center text-lg font-semibold text-blue-700 shadow-md transition-all hover:bg-gray-100"
-                  >
-                    Sign Up
-                  </a>
-                </div>
-              </div>
-            </div>
-          )}
-        </header>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  };
 
-        {/* --- Main Content --- */}
+
+  // --- Landing Page Content Component ---
+  const LandingPageContent = () => {
+    const [activeFaq, setActiveFaq] = useState<number | null>(null);
+    const [formData, setFormData] = useState({
+      name: "",
+      email: "",
+      message: "",
+    });
+
+    const animationStyle = `
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fadeInUp { animation: fadeInUp 0.5s ease-out forwards; }
+      .delay-100 { animation-delay: 0.1s; }
+      .delay-200 { animation-delay: 0.2s; }
+      .delay-300 { animation-delay: 0.3s; }
+      .delay-400 { animation-delay: 0.4s; }
+      .delay-500 { animation-delay: 0.5s; }
+    `;
+
+    const features = [
+      { name: "Course Tracking", description: "Monitor student progress and course milestones.", icon: <CourseTrackingIcon />, },
+      { name: "Instructor Dashboard", description: "Manage courses, students, and content easily.", icon: <DashboardIcon />, },
+      { name: "Student Analytics", description: "Gain insights into student performance.", icon: <AnalyticsIcon />, },
+      { name: "Assignment & Grading", description: "Streamline the assignment and grading process.", icon: <GradingIcon />, },
+      { name: "Real-time Notifications", description: "Keep everyone informed instantly.", icon: <NotificationIcon />, },
+      { name: "Cloud-based Access", description: "Access securely from anywhere, any device.", icon: <CloudIcon />, },
+    ];
+
+    const programs = [
+      { title: "Full-Stack Web Development", description: "Master React, Node.js, and Express.", image: "https://placehold.co/600x400/14B8A6/FFFFFF?text=Web+Dev", }, // Updated color
+      { title: "Data Science & Machine Learning", description: "Learn Python, Pandas, and Scikit-learn.", image: "https://placehold.co/600x400/059669/FFFFFF?text=Data+Science", }, // Updated color
+      { title: "UX/UI Design Fundamentals", description: "Go from idea to prototype with Figma.", image: "https://placehold.co/600x400/0D9488/FFFFFF?text=UX/UI+Design", }, // Updated color
+    ];
+
+    const blogPosts = [
+      { title: "The Future of E-Learning", date: "Oct 24, 2025", excerpt: "Explore upcoming trends in online education...", image: "https://placehold.co/600x400/EC4899/FFFFFF?text=Blog+1", },
+      { title: "10 Tips for Online Teaching", date: "Oct 20, 2025", excerpt: "Keep students engaged with proven strategies...", image: "https://placehold.co/600x400/F59E0B/FFFFFF?text=Blog+2", },
+      { title: "Why Student Analytics Matter", date: "Oct 15, 2025", excerpt: "Learn how data improves outcomes...", image: "https://placehold.co/600x400/6366F1/FFFFFF?text=Blog+3", },
+    ];
+
+    const faqs = [
+      { question: "Is there a free trial?", answer: "Yes, we offer a 14-day free trial on Basic and Pro plans.", },
+      { question: "Can I switch plans later?", answer: "Absolutely. Upgrade, downgrade, or cancel anytime.", },
+      { question: "What support do you offer?", answer: "Email support on all plans. Pro/Enterprise get priority chat/phone.", },
+      { question: "Is my data secure?", answer: "Security is our top priority. We use industry-standard encryption and backups.", },
+    ];
+
+    const handleFaqToggle = (index: number) => {
+      setActiveFaq(activeFaq === index ? null : index);
+    };
+    const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+    const handleFormSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      console.log("Contact Form Submitted:", formData);
+      alert("Message sent! We'll get back to you soon.");
+      setFormData({ name: "", email: "", message: "" });
+    };
+
+    return (
+      <>
+        <style>{animationStyle}</style>
         <main className="flex-grow">
-          {/* --- Hero Section --- */}
-          <section className="bg-gradient-to-b from-white to-blue-50 py-24 md:py-32 lg:py-40">
+          {/* --- Hero Section (Updated Background) --- */}
+          <section className="bg-gradient-to-b from-white to-teal-50 py-24 md:py-32 lg:py-40">
             <div className="container mx-auto px-4 text-center">
               <h1 className="animate-fadeInUp text-4xl font-extrabold tracking-tight text-gray-900 md:text-5xl lg:text-6xl">
                 The All-in-One Course Management System
@@ -487,8 +410,8 @@ export default function LandingPage() {
               </p>
               <div className="animate-fadeInUp delay-200 mt-10">
                 <a
-                  href="#pricing"
-                  className="rounded-full bg-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:bg-blue-700 hover:shadow-xl"
+                  href="#programs"
+                  className="rounded-full bg-teal-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:bg-teal-700 hover:shadow-xl" // Updated color
                 >
                   Get Started Today
                 </a>
@@ -496,11 +419,14 @@ export default function LandingPage() {
             </div>
           </section>
 
-          {/* --- Features Section --- */}
+          {/* --- Stats Section --- */}
+          <StatsSection />
+
+          {/* --- Features Section (Updated Accent) --- */}
           <section id="features" className="bg-white py-20 md:py-28">
             <div className="container mx-auto px-4">
               <div className="mx-auto mb-16 max-w-3xl text-center">
-                <h2 className="text-base font-semibold uppercase tracking-wider text-blue-600">
+                <h2 className="text-base font-semibold uppercase tracking-wider text-teal-700"> {/* Updated color */}
                   Features
                 </h2>
                 <p className="mt-2 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
@@ -520,6 +446,7 @@ export default function LandingPage() {
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     <div className="mb-4">
+                      {/* FeatureIcon already updated to teal */}
                       <FeatureIcon>{feature.icon}</FeatureIcon>
                     </div>
                     <h3 className="mb-2 text-xl font-semibold text-gray-900">
@@ -532,8 +459,107 @@ export default function LandingPage() {
             </div>
           </section>
 
-          {/* --- About Section --- */}
-          <section id="about" className="bg-blue-50 py-20 md:py-28">
+          {/* --- All Programs Section (Updated Background & Accent) --- */}
+          <section id="programs" className="bg-teal-50 py-20 md:py-28"> {/* Updated background */}
+            <div className="container mx-auto px-4">
+              <div className="mx-auto mb-16 max-w-3xl text-center">
+                 <h2 className="text-base font-semibold uppercase tracking-wider text-teal-700"> {/* Updated color */}
+                   Our Programs
+                 </h2>
+                 <p className="mt-2 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                   Explore Our Popular Courses
+                 </p>
+                 <p className="mt-4 text-lg text-gray-600">
+                   Find the perfect program to advance your skills and career.
+                 </p>
+              </div>
+              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {programs.map((program, index) => (
+                  <div
+                    key={program.title}
+                    className="animate-fadeInUp flex flex-col overflow-hidden rounded-2xl bg-white shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl opacity-0"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <img
+                      className="h-56 w-full object-cover"
+                      src={program.image}
+                      alt={program.title}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "https://placehold.co/600x400/gray/white?text=Image+Error";
+                      }}
+                    />
+                    <div className="flex-grow p-6">
+                      <h3 className="mb-3 text-2xl font-semibold text-gray-900">
+                        {program.title}
+                      </h3>
+                      <p className="text-gray-600">
+                        {program.description}
+                      </p>
+                    </div>
+                    <div className="p-6 pt-0">
+                      <a href="#" className="font-semibold text-teal-600 transition-colors hover:text-teal-700"> {/* Updated color */}
+                        Learn More &rarr;
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* --- Blogs Section (Updated Accent) --- */}
+          <section id="blogs" className="bg-white py-20 md:py-28">
+            <div className="container mx-auto px-4">
+              <div className="mx-auto mb-16 max-w-3xl text-center">
+                 <h2 className="text-base font-semibold uppercase tracking-wider text-teal-700"> {/* Updated color */}
+                   From the Blog
+                 </h2>
+                 <p className="mt-2 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                   Latest News & Insights
+                 </p>
+                 <p className="mt-4 text-lg text-gray-600">
+                   Stay updated with the latest in e-learning and platform updates.
+                 </p>
+              </div>
+              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {blogPosts.map((post, index) => (
+                  <div
+                    key={post.title}
+                    className="animate-fadeInUp flex flex-col overflow-hidden rounded-2xl bg-white shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl opacity-0"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <img
+                      className="h-56 w-full object-cover"
+                      src={post.image}
+                      alt={post.title}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "https://placehold.co/600x400/gray/white?text=Image+Error";
+                      }}
+                    />
+                    <div className="flex-grow p-6">
+                      <p className="mb-2 text-sm font-medium text-gray-500">{post.date}</p>
+                      <h3 className="mb-3 text-2xl font-semibold text-gray-900">
+                        {post.title}
+                      </h3>
+                      <p className="text-gray-600">
+                        {post.excerpt}
+                      </p>
+                    </div>
+                    <div className="p-6 pt-0">
+                      <a href="#" className="font-semibold text-teal-600 transition-colors hover:text-teal-700"> {/* Updated color */}
+                        Read Full Post &rarr;
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* --- About Section (Updated Background) --- */}
+          <section id="about" className="bg-teal-50 py-20 md:py-28"> {/* Updated background */}
             <div className="container mx-auto px-4">
               <div className="mx-auto max-w-4xl text-center">
                 <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
@@ -552,9 +578,7 @@ export default function LandingPage() {
             </div>
           </section>
 
-          
-
-          {/* --- FAQ Section --- */}
+          {/* --- FAQ Section (Updated Accent) --- */}
           <section id="faq" className="bg-white py-20 md:py-28">
             <div className="container mx-auto max-w-4xl px-4">
               <div className="mx-auto mb-16 max-w-3xl text-center">
@@ -574,7 +598,7 @@ export default function LandingPage() {
                       </span>
                       <span className="ml-4">
                         {activeFaq === index ? (
-                          <MinusIcon className="h-6 w-6 text-blue-600" />
+                          <MinusIcon className="h-6 w-6 text-teal-600" /> /* Updated color */
                         ) : (
                           <PlusIcon className="h-6 w-6 text-gray-500" />
                         )}
@@ -591,8 +615,8 @@ export default function LandingPage() {
             </div>
           </section>
 
-          {/* --- Contact Section --- */}
-          <section id="contact" className="bg-blue-50 py-20 md:py-28">
+          {/* --- Contact Section (Updated Background & Button) --- */}
+          <section id="contact" className="bg-teal-50 py-20 md:py-28"> {/* Updated background */}
             <div className="container mx-auto max-w-4xl px-4">
               <div className="mx-auto mb-16 max-w-3xl text-center">
                 <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
@@ -608,55 +632,26 @@ export default function LandingPage() {
                 className="grid grid-cols-1 gap-y-6 rounded-2xl bg-white p-8 shadow-2xl"
               >
                 <div>
-                  <label htmlFor="name" className="sr-only">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    id="name"
-                    value={formData.name}
-                    onChange={handleFormChange}
-                    required
-                    className="block w-full rounded-md border-gray-300 px-4 py-3 shadow-sm placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
-                    placeholder="Full Name"
-                  />
+                  <label htmlFor="name" className="sr-only"> Name </label>
+                  <input type="text" name="name" id="name" value={formData.name} onChange={handleFormChange} required
+                    className="block w-full rounded-md border-gray-300 px-4 py-3 shadow-sm placeholder-gray-400 focus:border-teal-500 focus:ring-teal-500" /* Updated focus */
+                    placeholder="Full Name" />
                 </div>
                 <div>
-                  <label htmlFor="email" className="sr-only">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    id="email"
-                    value={formData.email}
-                    onChange={handleFormChange}
-                    required
-                    className="block w-full rounded-md border-gray-300 px-4 py-3 shadow-sm placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
-                    placeholder="Email Address"
-                  />
+                  <label htmlFor="email" className="sr-only"> Email </label>
+                  <input type="email" name="email" id="email" value={formData.email} onChange={handleFormChange} required
+                    className="block w-full rounded-md border-gray-300 px-4 py-3 shadow-sm placeholder-gray-400 focus:border-teal-500 focus:ring-teal-500" /* Updated focus */
+                    placeholder="Email Address" />
                 </div>
                 <div>
-                  <label htmlFor="message" className="sr-only">
-                    Message
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows={4}
-                    value={formData.message}
-                    onChange={handleFormChange}
-                    required
-                    className="block w-full rounded-md border-gray-300 px-4 py-3 shadow-sm placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
-                    placeholder="Your Message"
-                  ></textarea>
+                  <label htmlFor="message" className="sr-only"> Message </label>
+                  <textarea id="message" name="message" rows={4} value={formData.message} onChange={handleFormChange} required
+                    className="block w-full rounded-md border-gray-300 px-4 py-3 shadow-sm placeholder-gray-400 focus:border-teal-500 focus:ring-teal-500" /* Updated focus */
+                    placeholder="Your Message"></textarea>
                 </div>
                 <div>
-                  <button
-                    type="submit"
-                    className="w-full rounded-full bg-blue-600 px-8 py-3 text-lg font-semibold text-white shadow-lg transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  >
+                  <button type="submit"
+                    className="w-full rounded-full bg-teal-600 px-8 py-3 text-lg font-semibold text-white shadow-lg transition-colors hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"> {/* Updated color */}
                     Send Message
                   </button>
                 </div>
@@ -664,128 +659,287 @@ export default function LandingPage() {
             </div>
           </section>
         </main>
+      </>
+    );
+  };
 
-        {/* --- Footer (Colorful) --- */}
-        <footer className="bg-gradient-to-r from-blue-700 to-purple-800 text-gray-200">
-          <div className="container mx-auto px-4 py-16">
-            <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-              {/* Logo & Copyright */}
-              <div className="col-span-2 md:col-span-1">
-                <a
-                  href="#home"
-                  className="text-2xl font-bold text-white transition-colors hover:text-gray-100"
-                >
-                  Quantum UI
-                </a>
-                <p className="mt-4 text-sm text-gray-300">
-                  &copy; {new Date().getFullYear()} Quantum UI.
-                  All rights reserved.
-                </p>
-                <div className="mt-6 flex space-x-5">
-                  <a
-                    href="#"
-                    className="text-gray-300 transition-colors hover:text-white"
-                    aria-label="Facebook"
-                  >
-                    <FacebookIcon className="h-6 w-6" />
-                  </a>
-                  <a
-                    href="#"
-                    className="text-gray-300 transition-colors hover:text-white"
-                    aria-label="Twitter"
-                  >
-                    <TwitterIcon className="h-6 w-6" />
-                  </a>
-                  <a
-                    href="#"
-                    className="text-gray-300 transition-colors hover:text-white"
-                    aria-label="LinkedIn"
-                  >
-                    <LinkedInIcon className="h-6 w-6" />
+
+  // --- Dashboard Content Component (Updated Theme) ---
+  const DashboardContent = () => {
+    // Placeholder data for courses
+    const myCourses = [
+      { id: 1, title: "Introduction to Web Development", instructor: "Dr. Smith", progress: 75, image: "https://placehold.co/600x400/14B8A6/FFFFFF?text=Web+Dev+101" }, // Teal
+      { id: 2, title: "Advanced Data Structures", instructor: "Prof. Lee", progress: 30, image: "https://placehold.co/600x400/059669/FFFFFF?text=Data+Structures" }, // Green
+      { id: 3, title: "UX Design Principles", instructor: "Ms. Evans", progress: 95, image: "https://placehold.co/600x400/0D9488/FFFFFF?text=UX+Design" }, // Darker Teal
+    ];
+
+    return (
+      <main className="flex-grow bg-gray-100 py-12 md:py-20">
+        <div className="container mx-auto px-4">
+          <h1 className="mb-8 text-3xl font-bold text-gray-900 md:text-4xl">My Courses</h1>
+
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {myCourses.map(course => (
+              <div key={course.id} className="overflow-hidden rounded-xl bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl">
+                 <img
+                      className="h-48 w-full object-cover"
+                      src={course.image}
+                      alt={course.title}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "https://placehold.co/600x400/gray/white?text=Course";
+                      }}
+                    />
+                <div className="p-6">
+                  <h2 className="mb-2 text-xl font-semibold text-gray-900">{course.title}</h2>
+                  <p className="mb-4 text-sm text-gray-600">Instructor: {course.instructor}</p>
+                  <div className="mb-2 h-2 w-full rounded-full bg-gray-200">
+                     <div
+                        className="h-2 rounded-full bg-teal-600" // Updated color
+                        style={{ width: `${course.progress}%` }}>
+                     </div>
+                  </div>
+                  <p className="text-right text-sm font-medium text-teal-700">{course.progress}% Complete</p> {/* Updated color */}
+                  <a href="#" className="mt-4 inline-block rounded-full bg-teal-100 px-5 py-2 text-sm font-semibold text-teal-700 transition-colors hover:bg-teal-200"> {/* Updated color */}
+                    Continue Course
                   </a>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+      </main>
+    );
+  };
 
-              {/* Quick Links */}
-              <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
-                  Quick Links
-                </h3>
-                <ul className="mt-4 space-y-3">
-                  {navLinks.map((link) => (
-                    <li key={link.name}>
-                      <a
-                        href={link.href}
-                        className="text-sm text-gray-300 transition-colors hover:text-white"
-                      >
-                        {link.name}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
+  // --- Reworked Footer Component ---
+  const Footer = () => {
+    // Keep the existing QuantumU footer links
+    const aboutLinks = [
+      { name: "Who we are", href: "#" },
+      { name: "Blog", href: "#blogs" },
+      { name: "Moodle Themes", href: "#" }, // Placeholder link
+      { name: "Contact Us", href: "#contact" },
+    ];
+    const supportLinks = [
+      { name: "Help", href: "#" }, // Placeholder link
+      { name: "FAQs", href: "#faq" },
+      { name: "Terms of Service", href: "#" }, // Placeholder link
+      { name: "Privacy Policy", href: "#" }, // Placeholder link
+    ];
+
+    return (
+     <footer className="bg-teal-950 text-gray-300"> {/* Use the dark teal color */}
+       <div className="container mx-auto px-8 py-16">
+         <div className="grid grid-cols-1 gap-12 md:grid-cols-4 lg:grid-cols-5">
+           {/* Logo Section */}
+           <div className="col-span-1 md:col-span-1 lg:col-span-1 flex flex-col justify-between items-start">
+             <div>
+               <a href="#home" className="text-3xl font-bold text-white">
+                 QuantumU
+               </a>
+               <p className="mt-4 text-sm text-gray-400">
+                 &copy; {new Date().getFullYear()} QuantumU.
+                 All rights reserved.
+               </p>
+             </div>
+           </div>
+
+           {/* Vertical Divider (only for large screens) */}
+           <div className="hidden lg:flex items-center justify-center relative">
+             <div className="absolute h-full w-px bg-gray-700"></div>
+           </div>
+
+           {/* About Us */}
+           <div className="col-span-1">
+             <h3 className="text-lg font-semibold text-white mb-6">About us</h3>
+             <ul className="space-y-4">
+               {aboutLinks.map(link => (
+                 <li key={link.name}><a href={link.href} className="text-base text-gray-400 hover:text-white transition-colors">{link.name}</a></li>
+               ))}
+             </ul>
+           </div>
+
+           {/* Support */}
+           <div className="col-span-1">
+             <h3 className="text-lg font-semibold text-white mb-6">Support</h3>
+             <ul className="space-y-4">
+               {supportLinks.map(link => (
+                 <li key={link.name}><a href={link.href} className="text-base text-gray-400 hover:text-white transition-colors">{link.name}</a></li>
+               ))}
+             </ul>
+           </div>
+
+           {/* Get in touch */}
+           <div className="col-span-1 md:col-span-2 lg:col-span-1">
+             <h3 className="text-lg font-semibold text-white mb-6">Get in touch</h3>
+             <p className="text-gray-400 text-sm mb-6 max-w-xs">
+               Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo
+               ligula eget dolor. Aenean massa.
+             </p>
+             <div className="space-y-4">
+               <p className="text-base text-gray-400">0800 123 45678</p>
+               <a href="mailto:ansh@quddle.ai" className="text-base text-gray-400 hover:text-white transition-colors">ansh@quddle.ai</a>
+             </div>
+             <div className="mt-8 flex space-x-4">
+               <button className="rounded-full border border-gray-600 px-4 py-2 text-sm text-gray-400 hover:border-white hover:text-white transition-colors">social handle</button>
+               <button className="rounded-full border border-gray-600 px-4 py-2 text-sm text-gray-400 hover:border-white hover:text-white transition-colors">social handle</button>
+             </div>
+           </div>
+         </div>
+       </div>
+     </footer>
+    );
+  };
+
+  // --- Shared Header Component (Updated Theme) ---
+  const Header = () => {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const navLinks = [
+      { name: "Home", href: "#home" },
+      { name: "Features", href: "#features" },
+      { name: "All Programs", href: "#programs" },
+      { name: "Blogs", href: "#blogs" },
+      { name: "About", href: "#about" },
+      { name: "FAQ", href: "#faq" },
+      { name: "Contact", href: "#contact" },
+    ];
+    return (
+      <header
+          id="home"
+          className="sticky top-0 z-50 w-full bg-teal-950 text-white shadow-lg" // Updated background
+        >
+          <nav className="container mx-auto flex h-20 flex-wrap items-center justify-between px-4 md:flex-nowrap relative">
+            {/* Logo */}
+            <a
+              href="#home"
+              className="text-2xl font-bold transition-transform hover:scale-105"
+            >
+              QuantumU {/* Updated Logo to match footer */}
+            </a>
+
+            {/* Desktop Nav (Centered) */}
+            <div className="absolute left-1/2 hidden -translate-x-1/2 md:flex md:space-x-1">
+              {/* Render navLinks only if user is NOT logged in */}
+              {!isLoggedIn && navLinks.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-gray-200 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  {link.name}
+                </a>
+              ))}
+            </div>
+
+            {/* Right side Actions: Login/Signup OR User Menu */}
+            <div className="hidden items-center space-x-4 md:flex">
+              {isLoggedIn ? (
+                // --- User Dropdown Menu ---
+                <DropdownMenu
+                  trigger={
+                    <span className="flex items-center space-x-2 rounded-full p-1 transition-colors hover:bg-white/10">
+                      <UserCircleIcon className="h-8 w-8 text-gray-200" />
+                      <span className="text-sm font-medium text-gray-200">My Account</span>
+                      <ChevronDownIcon className="h-4 w-4 text-gray-300" />
+                    </span>
+                  }
+                >
+                  <DropdownMenuItem onClick={() => alert("Navigate to My Courses")}>My Courses</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => alert("Navigate to Edit Profile")}>Edit Profile</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                </DropdownMenu>
+              ) : (
+                // --- Sign In / Sign Up Buttons ---
+                <>
+                  <button
+                    onClick={handleLogin} // Simulate login
+                    className="rounded-lg px-3 py-2 text-sm font-medium text-gray-200 transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={handleLogin} // Simulate signup -> login
+                    className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-teal-800 shadow-md transition-all hover:bg-gray-100 hover:shadow-lg" // Updated text color
+                  >
+                    Sign Up
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setIsMenuOpen(true)}
+                className="rounded-md p-2 text-gray-200 transition-colors hover:bg-white/10"
+                aria-label="Open menu"
+              >
+                <MenuIcon className="h-6 w-6" />
+              </button>
+            </div>
+          </nav>
+
+          {/* --- Mobile Menu (Updated Theme) --- */}
+          {isMenuOpen && (
+            <div className="fixed inset-0 z-[100] flex flex-col bg-teal-950 p-4 text-white md:hidden"> {/* Updated background */}
+              <div className="flex items-center justify-between">
+                <a href="#home" className="text-2xl font-bold">
+                  QuantumU {/* Updated Logo */}
+                </a>
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="rounded-md p-2 text-gray-200 transition-colors hover:bg-white/10"
+                  aria-label="Close menu"
+                >
+                  <CloseIcon className="h-6 w-6" />
+                </button>
               </div>
+              <div className="mt-6 flex flex-col space-y-2 overflow-y-auto">
+                 {/* Show navLinks if NOT logged in */}
+                {!isLoggedIn && navLinks.map((link) => (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="rounded-lg px-4 py-3 text-lg font-medium text-gray-200 transition-colors hover:bg-white/10"
+                  >
+                    {link.name}
+                  </a>
+                ))}
 
-              {/* Legal Links
-              <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
-                  Legal
-                </h3>
-                <ul className="mt-4 space-y-3">
-                  <li>
-                    <a
-                      href="#"
-                      className="text-sm text-gray-300 transition-colors hover:text-white"
-                    >
-                      Privacy Policy
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="text-sm text-gray-300 transition-colors hover:text-white"
-                    >
-                      Terms of Service
-                    </a>
-                  </li>
-                </ul>
-              </div> */}
-
-              {/* Company Links */}
-              <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
-                  Company
-                </h3>
-                <ul className="mt-4 space-y-3">
-                  <li>
-                    <a
-                      href="#"
-                      className="text-sm text-gray-300 transition-colors hover:text-white"
-                    >
-                      About Us
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="text-sm text-gray-300 transition-colors hover:text-white"
-                    >
-                      Careers
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="text-sm text-gray-300 transition-colors hover:text-white"
-                    >
-                      Blog
-                    </a>
-                  </li>
-                </ul>
+                {/* Mobile Account Actions */}
+                <div className="border-t border-white/20 pt-4 mt-4">
+                  {isLoggedIn ? (
+                    <>
+                      <button onClick={() => { alert("Nav to My Courses"); setIsMenuOpen(false); }} className="block w-full text-left rounded-lg px-4 py-3 text-lg font-medium text-gray-200 transition-colors hover:bg-white/10"> My Courses </button>
+                      <button onClick={() => { alert("Nav to Edit Profile"); setIsMenuOpen(false); }} className="block w-full text-left rounded-lg px-4 py-3 text-lg font-medium text-gray-200 transition-colors hover:bg-white/10"> Edit Profile </button>
+                      <button onClick={() => { handleLogout(); setIsMenuOpen(false); }} className="block w-full text-left rounded-lg px-4 py-3 text-lg font-medium text-red-300 transition-colors hover:bg-red-500/20 hover:text-red-200"> Logout </button>
+                    </>
+                  ) : (
+                    <>
+                     <button onClick={() => { handleLogin(); setIsMenuOpen(false); }} className="block w-full text-left rounded-lg px-4 py-3 text-lg font-medium text-gray-200 transition-colors hover:bg-white/10"> Sign In </button>
+                     <button onClick={() => { handleLogin(); setIsMenuOpen(false); }} className="mt-2 block w-full rounded-full bg-white px-5 py-3 text-center text-lg font-semibold text-teal-800 shadow-md transition-all hover:bg-gray-100"> {/* Updated text color */}
+                       Sign Up
+                     </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        </footer>
-      </div>
-    </>
+          )}
+        </header>
+    );
+  };
+
+
+  // --- Render the main App ---
+  return (
+    <div className="flex min-h-screen w-full flex-col bg-white text-gray-800">
+      <Header />
+      {isLoggedIn ? <DashboardContent /> : <LandingPageContent />}
+      <Footer />
+    </div>
   );
 }
+
