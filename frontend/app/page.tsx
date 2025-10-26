@@ -220,9 +220,11 @@ const ChevronDownIcon = (props: React.SVGProps<SVGSVGElement>) => (
 const DropdownMenu = ({
   trigger,
   children,
+  title, // Added title prop for the dropdown
 }: {
   trigger: React.ReactNode;
   children: React.ReactNode;
+  title?: string; // Optional title
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -247,6 +249,7 @@ const DropdownMenu = ({
       </button>
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+          {title && <div className="px-4 py-2 text-xs font-semibold uppercase text-gray-500">{title}</div>}
           {children}
         </div>
       )}
@@ -257,13 +260,17 @@ const DropdownMenu = ({
 const DropdownMenuItem = ({
   children,
   onClick,
+  highlighted = false, // Added highlighted prop
 }: {
   children: React.ReactNode;
   onClick?: () => void;
+  highlighted?: boolean;
 }) => (
   <button
     onClick={onClick}
-    className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+    className={`block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 ${
+      highlighted ? "bg-gray-100 font-semibold" : "" // Apply highlight style
+    }`}
   >
     {children}
   </button>
@@ -272,19 +279,246 @@ const DropdownMenuItem = ({
 
 // --- Main Page Component ---
 
+// Define the type for the Professor Dashboard view state
+type ProfessorView = 'myCourses' | 'addCourse' | 'analytics';
+
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState<'student' | 'professor' | null>(null); // Track user role
+  const [showRoleSelection, setShowRoleSelection] = useState(false); // To show role selection modal
+  const [currentView, setCurrentView] = useState<'dashboard' | 'editProfile' | 'landing'>('landing'); // Manage main views
+  
+  // NEW: State for Professor Dashboard sub-views, moved to App component
+  const [currentProfView, setCurrentProfView] = useState<ProfessorView>('myCourses');
+
 
   // Simulate login
-  const handleLogin = () => {
-    console.log("Simulating Login...");
+  const handleLogin = (role: 'student' | 'professor') => {
+    console.log(`Simulating Login for ${role}...`);
     setIsLoggedIn(true);
+    setUserRole(role);
+    setCurrentView('dashboard'); // Go to dashboard after login
+    // Reset professor view to default when logging in
+    if (role === 'professor') {
+      setCurrentProfView('myCourses');
+    }
+    setShowRoleSelection(false);
   };
 
   // Simulate logout
   const handleLogout = () => {
     console.log("Simulating Logout...");
     setIsLoggedIn(false);
+    setUserRole(null);
+    setCurrentView('landing');
+  };
+
+  // --- Student Profile Edit Component ---
+  const StudentProfileEdit = () => {
+    const [profileData, setProfileData] = useState({
+      name: "Rahul",
+      email: "rahul123@gmail.com",
+      studentId: "S12345",
+      preferredLearningStyle: "Visual",
+    });
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const { name, value } = e.target;
+      setProfileData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      console.log("Student Profile Updated:", profileData);
+      alert("Student profile updated successfully!");
+      setCurrentView('dashboard'); // Go back to dashboard after update
+    };
+
+    return (
+      <main className="flex-grow bg-gray-100 py-12 md:py-20">
+        <div className="container mx-auto px-4 max-w-2xl">
+          <h1 className="mb-8 text-3xl font-bold text-gray-900 md:text-4xl">Edit Student Profile</h1>
+          <div className="rounded-xl bg-white p-8 shadow-lg">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-y-6">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  value={profileData.name}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  value={profileData.email}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="studentId" className="block text-sm font-medium text-gray-700">Student ID</label>
+                <input
+                  type="text"
+                  name="studentId"
+                  id="studentId"
+                  value={profileData.studentId}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="preferredLearningStyle" className="block text-sm font-medium text-gray-700">Preferred Learning Style</label>
+                <select
+                  name="preferredLearningStyle"
+                  id="preferredLearningStyle"
+                  value={profileData.preferredLearningStyle}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                >
+                  <option value="Visual">Visual</option>
+                  <option value="Auditory">Auditory</option>
+                  <option value="Kinesthetic">Kinesthetic</option>
+                  <option value="Reading/Writing">Reading/Writing</option>
+                </select>
+              </div>
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => setCurrentView('dashboard')}
+                  className="rounded-full border border-gray-300 px-6 py-2 text-base font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-full bg-teal-600 px-6 py-2 text-base font-semibold text-white shadow-md transition-colors hover:bg-teal-700"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    );
+  };
+
+  // --- Professor Profile Edit Component ---
+  const ProfessorProfileEdit = () => {
+    const [profileData, setProfileData] = useState({
+      name: "Dr. Sachin Kumar",
+      email: "sachin.k@university.edu",
+      department: "Computer Science",
+      researchInterests: "AI, Machine Learning, Data Privacy",
+      bio: "Dr. Sachin Kumar is a dedicated educator and researcher with over 8 years of experience in teaching and academic development. Their work focuses on advancing knowledge in Computer Science, Artificial Intelligence, or Data Analytics , with a strong passion for mentoring students and fostering innovation.",
+    });
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setProfileData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      console.log("Professor Profile Updated:", profileData);
+      alert("Professor profile updated successfully!");
+      setCurrentView('dashboard'); // Go back to dashboard after update
+    };
+
+    return (
+      <main className="flex-grow bg-gray-100 py-12 md:py-20">
+        <div className="container mx-auto px-4 max-w-2xl">
+          <h1 className="mb-8 text-3xl font-bold text-gray-900 md:text-4xl">Edit Professor Profile</h1>
+          <div className="rounded-xl bg-white p-8 shadow-lg">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-y-6">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  value={profileData.name}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  value={profileData.email}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="department" className="block text-sm font-medium text-gray-700">Department</label>
+                <input
+                  type="text"
+                  name="department"
+                  id="department"
+                  value={profileData.department}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="researchInterests" className="block text-sm font-medium text-gray-700">Research Interests</label>
+                <textarea
+                  name="researchInterests"
+                  id="researchInterests"
+                  rows={3}
+                  value={profileData.researchInterests}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                ></textarea>
+              </div>
+              <div>
+                <label htmlFor="bio" className="block text-sm font-medium text-gray-700">Biography</label>
+                <textarea
+                  name="bio"
+                  id="bio"
+                  rows={5}
+                  value={profileData.bio}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                ></textarea>
+              </div>
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => setCurrentView('dashboard')}
+                  className="rounded-full border border-gray-300 px-6 py-2 text-base font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-full bg-teal-600 px-6 py-2 text-base font-semibold text-white shadow-md transition-colors hover:bg-teal-700"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    );
   };
 
   // --- Stats Section Component ---
@@ -664,8 +898,8 @@ export default function App() {
   };
 
 
-  // --- Dashboard Content Component (Updated Theme) ---
-  const DashboardContent = () => {
+  // --- Student Dashboard Content Component ---
+  const StudentDashboardContent = () => {
     // Placeholder data for courses
     const myCourses = [
       { id: 1, title: "Introduction to Web Development", instructor: "Dr. Smith", progress: 75, image: "https://placehold.co/600x400/14B8A6/FFFFFF?text=Web+Dev+101" }, // Teal
@@ -711,6 +945,170 @@ export default function App() {
       </main>
     );
   };
+
+  // --- Professor Dashboard Content Component (Updated Theme) ---
+  const ProfessorDashboardContent = ({
+    currentView, // Accept currentProfView state from parent
+    setView, // Accept setCurrentProfView function from parent
+  }: {
+    currentView: ProfessorView;
+    setView: (view: ProfessorView) => void;
+  }) => {
+
+    const MyProfessorCourses = () => (
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-gray-900">My Teaching Courses</h2>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[
+            { id: 1, title: "Advanced React Patterns", students: 45, image: "https://placehold.co/600x400/0F766E/FFFFFF?text=React+Patterns" },
+            { id: 2, title: "Introduction to Quantum Computing", students: 22, image: "https://placehold.co/600x400/0D9488/FFFFFF?text=Quantum+Comp" },
+            { id: 3, title: "Ethical AI Design", students: 38, image: "https://placehold.co/600x400/047857/FFFFFF?text=Ethical+AI" },
+          ].map(course => (
+            <div key={course.id} className="rounded-xl bg-white p-6 shadow-lg">
+              <img src={course.image} alt={course.title} className="h-40 w-full object-cover rounded-md mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900">{course.title}</h3>
+              <p className="text-gray-600">Students Enrolled: {course.students}</p>
+              <div className="mt-4 flex space-x-2">
+                <button className="rounded-full bg-teal-100 px-4 py-2 text-sm font-semibold text-teal-700 hover:bg-teal-200">Manage</button>
+                <button
+                  onClick={() => setView('analytics')} // Use the passed-in setView function
+                  className="rounded-full border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                  View Analytics
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+
+    const AddNewCourse = () => {
+      const [newCourse, setNewCourse] = useState({ title: '', description: '', category: 'Development', image: '' });
+      const handleAddChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setNewCourse(prev => ({ ...prev, [name]: value }));
+      };
+      const handleAddSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        console.log("New Course Added:", newCourse);
+        alert(`Course "${newCourse.title}" added successfully!`);
+        setNewCourse({ title: '', description: '', category: 'Development', image: '' });
+        setView('myCourses'); // Use the passed-in setView function
+      };
+
+      return (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-gray-900">Add New Course</h2>
+          <form onSubmit={handleAddSubmit} className="rounded-xl bg-white p-8 shadow-lg grid grid-cols-1 gap-y-6 max-w-2xl mx-auto">
+             <div>
+                <label htmlFor="courseTitle" className="block text-sm font-medium text-gray-700">Course Title</label>
+                <input type="text" name="title" id="courseTitle" value={newCourse.title} onChange={handleAddChange} required
+                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500" />
+             </div>
+             <div>
+                <label htmlFor="courseDescription" className="block text-sm font-medium text-gray-700">Description</label>
+                <textarea name="description" id="courseDescription" rows={4} value={newCourse.description} onChange={handleAddChange}
+                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"></textarea>
+             </div>
+             <div>
+                <label htmlFor="courseCategory" className="block text-sm font-medium text-gray-700">Category</label>
+                <select name="category" id="courseCategory" value={newCourse.category} onChange={handleAddChange}
+                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500">
+                   <option value="Development">Development</option>
+                   <option value="Design">Design</option>
+                   <option value="Data Science">Data Science</option>
+                   <option value="Business">Business</option>
+                </select>
+             </div>
+             <div>
+                <label htmlFor="courseImage" className="block text-sm font-medium text-gray-700">Image URL (Optional)</label>
+                <input type="url" name="image" id="courseImage" value={newCourse.image} onChange={handleAddChange}
+                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500" />
+             </div>
+             <div className="flex justify-end space-x-4">
+                <button type="button" onClick={() => setView('myCourses')} // Use passed-in setView
+                   className="rounded-full border border-gray-300 px-6 py-2 text-base font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50">Cancel</button>
+                <button type="submit"
+                   className="rounded-full bg-teal-600 px-6 py-2 text-base font-semibold text-white shadow-md transition-colors hover:bg-teal-700">Add Course</button>
+             </div>
+          </form>
+        </div>
+      );
+    };
+
+    const CourseAnalytics = () => (
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-gray-900">Course Analytics</h2>
+        <div className="rounded-xl bg-white p-8 shadow-lg">
+          <p className="text-gray-700">Detailed analytics for your courses will appear here, showing student engagement, performance trends, popular modules, and completion rates.</p>
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="border border-gray-200 rounded-md p-4 bg-gray-50">
+              <h3 className="text-lg font-semibold text-gray-800">Engagement Overview</h3>
+              <p className="text-gray-600">Average time spent per student: 45 min/day</p>
+              <p className="text-gray-600">Active students last week: 80%</p>
+            </div>
+            <div className="border border-gray-200 rounded-md p-4 bg-gray-50">
+              <h3 className="text-lg font-semibold text-gray-800">Completion Rates</h3>
+              <p className="text-gray-600">Advanced React Patterns: 65%</p>
+              <p className="text-gray-600">Introduction to Quantum Computing: 40%</p>
+            </div>
+            {/* Placeholder for charts/graphs */}
+            <div className="col-span-1 md:col-span-2 mt-4 h-48 bg-gray-100 rounded-md flex items-center justify-center text-gray-500">
+              [Placeholder for Charts/Graphs]
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+
+    return (
+      <main className="flex-grow bg-gray-100 py-12 md:py-20">
+        <div className="container mx-auto px-4">
+          <h1 className="mb-8 text-3xl font-bold text-gray-900 md:text-4xl">Professor Dashboard</h1>
+
+          {/* Navigation for Professor Dashboard (uses passed-in state & setter) */}
+          <div className="mb-8 flex space-x-4 border-b border-gray-200">
+            <button
+              onClick={() => setView('myCourses')}
+              className={`pb-3 text-lg font-medium ${
+                currentView === 'myCourses'
+                  ? 'border-b-2 border-teal-600 text-teal-700'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              My Courses
+            </button>
+            <button
+              onClick={() => setView('addCourse')}
+              className={`pb-3 text-lg font-medium ${
+                currentView === 'addCourse'
+                  ? 'border-b-2 border-teal-600 text-teal-700'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Add Course
+            </button>
+            <button
+              onClick={() => setView('analytics')}
+              className={`pb-3 text-lg font-medium ${
+                currentView === 'analytics'
+                  ? 'border-b-2 border-teal-600 text-teal-700'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Analytics
+            </button>
+          </div>
+
+          {/* Conditional rendering of content based on passed-in state */}
+          {currentView === 'myCourses' && <MyProfessorCourses />}
+          {currentView === 'addCourse' && <AddNewCourse />}
+          {currentView === 'analytics' && <CourseAnalytics />}
+        </div>
+      </main>
+    );
+  };
+
 
   // --- Reworked Footer Component ---
   const Footer = () => {
@@ -774,8 +1172,8 @@ export default function App() {
            <div className="col-span-1 md:col-span-2 lg:col-span-1">
              <h3 className="text-lg font-semibold text-white mb-6">Get in touch</h3>
              <p className="text-gray-400 text-sm mb-6 max-w-xs">
-               Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo
-               ligula eget dolor. Aenean massa.
+               Have questions or need support? Our team is here to help you with any queries about our courses, platform, or partnerships.
+Reach out and we’ll get back to you as soon as possible.
              </p>
              <div className="space-y-4">
                <p className="text-base text-gray-400">0800 123 45678</p>
@@ -792,7 +1190,7 @@ export default function App() {
     );
   };
 
-  // --- Shared Header Component (Updated Theme) ---
+  // --- Shared Header Component (Updated Theme & Logic) ---
   const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const navLinks = [
@@ -836,30 +1234,51 @@ export default function App() {
             <div className="hidden items-center space-x-4 md:flex">
               {isLoggedIn ? (
                 // --- User Dropdown Menu ---
-                <DropdownMenu
-                  trigger={
-                    <span className="flex items-center space-x-2 rounded-full p-1 transition-colors hover:bg-white/10">
-                      <UserCircleIcon className="h-8 w-8 text-gray-200" />
-                      <span className="text-sm font-medium text-gray-200">My Account</span>
-                      <ChevronDownIcon className="h-4 w-4 text-gray-300" />
-                    </span>
-                  }
-                >
-                  <DropdownMenuItem onClick={() => alert("Navigate to My Courses")}>My Courses</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => alert("Navigate to Edit Profile")}>Edit Profile</DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
-                </DropdownMenu>
+                userRole === 'student' ? (
+                  <DropdownMenu
+                    trigger={
+                      <span className="flex items-center space-x-2 rounded-full p-1 transition-colors hover:bg-white/10">
+                        <UserCircleIcon className="h-8 w-8 text-gray-200" />
+                        <span className="text-sm font-medium text-gray-200">My Account</span>
+                        <ChevronDownIcon className="h-4 w-4 text-gray-300" />
+                      </span>
+                    }
+                    title="My Account"
+                  >
+                    <DropdownMenuItem onClick={() => setCurrentView('editProfile')}>Edit Profile</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setCurrentView('dashboard')}>My Courses</DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                  </DropdownMenu>
+                ) : (
+                  // Professor Dropdown Menu
+                  <DropdownMenu
+                    trigger={
+                      <span className="flex items-center space-x-2 rounded-full p-1 transition-colors hover:bg-white/10">
+                        <UserCircleIcon className="h-8 w-8 text-gray-200" />
+                        <span className="text-sm font-medium text-gray-200">Account</span>
+                        <ChevronDownIcon className="h-4 w-4 text-gray-300" />
+                      </span>
+                    }
+                    title="Account"
+                  >
+                    {/* Pass setCurrentProfView down */}
+                    <DropdownMenuItem onClick={() => setCurrentView('editProfile')} highlighted={currentView === 'editProfile'}>Edit Profile</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => { setCurrentView('dashboard'); setCurrentProfView('myCourses'); }}>My course</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => { setCurrentView('dashboard'); setCurrentProfView('addCourse'); }}>Add course</DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                  </DropdownMenu>
+                )
               ) : (
-                // --- Sign In / Sign Up Buttons ---
+                // --- Sign In / Sign Up Buttons (now open role selection) ---
                 <>
                   <button
-                    onClick={handleLogin} // Simulate login
+                    onClick={() => setShowRoleSelection(true)}
                     className="rounded-lg px-3 py-2 text-sm font-medium text-gray-200 transition-colors hover:bg-white/10 hover:text-white"
                   >
                     Sign In
                   </button>
                   <button
-                    onClick={handleLogin} // Simulate signup -> login
+                    onClick={() => setShowRoleSelection(true)}
                     className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-teal-800 shadow-md transition-all hover:bg-gray-100 hover:shadow-lg" // Updated text color
                   >
                     Sign Up
@@ -880,7 +1299,7 @@ export default function App() {
             </div>
           </nav>
 
-          {/* --- Mobile Menu (Updated Theme) --- */}
+          {/* --- Mobile Menu (Updated Theme & Logic) --- */}
           {isMenuOpen && (
             <div className="fixed inset-0 z-[100] flex flex-col bg-teal-950 p-4 text-white md:hidden"> {/* Updated background */}
               <div className="flex items-center justify-between">
@@ -911,15 +1330,24 @@ export default function App() {
                 {/* Mobile Account Actions */}
                 <div className="border-t border-white/20 pt-4 mt-4">
                   {isLoggedIn ? (
-                    <>
-                      <button onClick={() => { alert("Nav to My Courses"); setIsMenuOpen(false); }} className="block w-full text-left rounded-lg px-4 py-3 text-lg font-medium text-gray-200 transition-colors hover:bg-white/10"> My Courses </button>
-                      <button onClick={() => { alert("Nav to Edit Profile"); setIsMenuOpen(false); }} className="block w-full text-left rounded-lg px-4 py-3 text-lg font-medium text-gray-200 transition-colors hover:bg-white/10"> Edit Profile </button>
-                      <button onClick={() => { handleLogout(); setIsMenuOpen(false); }} className="block w-full text-left rounded-lg px-4 py-3 text-lg font-medium text-red-300 transition-colors hover:bg-red-500/20 hover:text-red-200"> Logout </button>
-                    </>
+                    userRole === 'student' ? (
+                      <>
+                        <button onClick={() => { setCurrentView('editProfile'); setIsMenuOpen(false); }} className="block w-full text-left rounded-lg px-4 py-3 text-lg font-medium text-gray-200 transition-colors hover:bg-white/10"> Edit Profile </button>
+                        <button onClick={() => { setCurrentView('dashboard'); setIsMenuOpen(false); }} className="block w-full text-left rounded-lg px-4 py-3 text-lg font-medium text-gray-200 transition-colors hover:bg-white/10"> My Courses </button>
+                        <button onClick={() => { handleLogout(); setIsMenuOpen(false); }} className="block w-full text-left rounded-lg px-4 py-3 text-lg font-medium text-red-300 transition-colors hover:bg-red-500/20 hover:text-red-200"> Logout </button>
+                      </>
+                    ) : ( // Professor mobile menu
+                      <>
+                        <button onClick={() => { setCurrentView('editProfile'); setIsMenuOpen(false); }} className="block w-full text-left rounded-lg px-4 py-3 text-lg font-medium text-gray-200 transition-colors hover:bg-white/10"> Edit Profile </button>
+                        <button onClick={() => { setCurrentView('dashboard'); setCurrentProfView('myCourses'); setIsMenuOpen(false); }} className="block w-full text-left rounded-lg px-4 py-3 text-lg font-medium text-gray-200 transition-colors hover:bg-white/10"> My course </button>
+                        <button onClick={() => { setCurrentView('dashboard'); setCurrentProfView('addCourse'); setIsMenuOpen(false); }} className="block w-full text-left rounded-lg px-4 py-3 text-lg font-medium text-gray-200 transition-colors hover:bg-white/10"> Add course </button>
+                        <button onClick={() => { handleLogout(); setIsMenuOpen(false); }} className="block w-full text-left rounded-lg px-4 py-3 text-lg font-medium text-red-300 transition-colors hover:bg-red-500/20 hover:text-red-200"> Logout </button>
+                      </>
+                    )
                   ) : (
                     <>
-                     <button onClick={() => { handleLogin(); setIsMenuOpen(false); }} className="block w-full text-left rounded-lg px-4 py-3 text-lg font-medium text-gray-200 transition-colors hover:bg-white/10"> Sign In </button>
-                     <button onClick={() => { handleLogin(); setIsMenuOpen(false); }} className="mt-2 block w-full rounded-full bg-white px-5 py-3 text-center text-lg font-semibold text-teal-800 shadow-md transition-all hover:bg-gray-100"> {/* Updated text color */}
+                     <button onClick={() => { setShowRoleSelection(true); setIsMenuOpen(false); }} className="block w-full text-left rounded-lg px-4 py-3 text-lg font-medium text-gray-200 transition-colors hover:bg-white/10"> Sign In </button>
+                     <button onClick={() => { setShowRoleSelection(true); setIsMenuOpen(false); }} className="mt-2 block w-full rounded-full bg-white px-5 py-3 text-center text-lg font-semibold text-teal-800 shadow-md transition-all hover:bg-gray-100"> {/* Updated text color */}
                        Sign Up
                      </button>
                     </>
@@ -932,13 +1360,60 @@ export default function App() {
     );
   };
 
+  // --- NEW: Role Selection Modal ---
+  const RoleSelectionModal = () => (
+    <div className="fixed inset-0 z-[101] flex items-center justify-center bg-black bg-opacity-50 p-4">
+      <div className="w-full max-w-sm rounded-lg bg-white p-8 shadow-xl text-center">
+        <h2 className="mb-6 text-2xl font-bold text-gray-900">Choose Your Role</h2>
+        <p className="mb-8 text-gray-700">Are you a student or a professor?</p>
+        <div className="space-y-4">
+          <button
+            onClick={() => handleLogin('student')}
+            className="w-full rounded-full bg-teal-600 px-6 py-3 text-lg font-semibold text-white shadow-md transition-colors hover:bg-teal-700"
+          >
+            I am a Student
+          </button>
+          <button
+            onClick={() => handleLogin('professor')}
+            className="w-full rounded-full border border-teal-600 px-6 py-3 text-lg font-semibold text-teal-700 shadow-md transition-colors hover:bg-teal-50"
+          >
+            I am a Professor
+          </button>
+        </div>
+        <button
+          onClick={() => setShowRoleSelection(false)}
+          className="mt-8 text-sm text-gray-500 hover:text-gray-700"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+
 
   // --- Render the main App ---
+  const renderMainContent = () => {
+    if (!isLoggedIn) {
+      return <LandingPageContent />;
+    }
+
+    if (currentView === 'editProfile') {
+      return userRole === 'student' ? <StudentProfileEdit /> : <ProfessorProfileEdit />;
+    }
+
+    // Default to dashboard for respective roles
+    // Pass down the current professor view state and setter
+    return userRole === 'student'
+      ? <StudentDashboardContent />
+      : <ProfessorDashboardContent currentView={currentProfView} setView={setCurrentProfView} />;
+  };
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-white text-gray-800">
       <Header />
-      {isLoggedIn ? <DashboardContent /> : <LandingPageContent />}
+      {renderMainContent()}
       <Footer />
+      {showRoleSelection && <RoleSelectionModal />}
     </div>
   );
 }
