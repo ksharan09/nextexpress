@@ -310,76 +310,7 @@ export default function LandingPage() {
     },
   ];
 
-  const pricingPlans = [
-    {
-      name: "Basic",
-      price: "$29",
-      period: "/month",
-      description: "For small teams or individual instructors.",
-      features: [
-        "Up to 5 Courses",
-        "1,000 Students",
-        "Basic Analytics",
-        "Email Support",
-      ],
-      buttonLabel: "Choose Basic",
-      isPopular: false,
-    },
-    {
-      name: "Pro",
-      price: "$79",
-      period: "/month",
-      description: "For growing institutions and businesses.",
-      features: [
-        "Up to 50 Courses",
-        "10,000 Students",
-        "Advanced Analytics",
-        "Priority Support",
-        "API Access",
-      ],
-      buttonLabel: "Choose Pro",
-      isPopular: true,
-    },
-    {
-      name: "Enterprise",
-      price: "Custom",
-      period: "",
-      description: "For large-scale organizations.",
-      features: [
-        "Unlimited Courses",
-        "Unlimited Students",
-        "Custom Analytics",
-        "Dedicated Support",
-        "SSO & Security",
-      ],
-      buttonLabel: "Contact Sales",
-      isPopular: false,
-    },
-  ];
-
-  const testimonials = [
-    {
-      quote:
-        "This Course Management System has revolutionized how I run my online school. The analytics are a game-changer!",
-      name: "Dr. Jane Smith",
-      title: "Professor of Engineering",
-      image: "https://placehold.co/100x100/E2E8F0/4A5568?text=JS",
-    },
-    {
-      quote:
-        "As a student, I love how easy it is to track my assignments and see my progress. Everything is in one place.",
-      name: "Mike Johnson",
-      title: "University Student",
-      image: "https://placehold.co/100x100/E2E8F0/4A5568?text=MJ",
-    },
-    {
-      quote:
-        "The instructor dashboard is incredibly intuitive. I spend less time on admin and more time teaching.",
-      name: "Sarah Lee",
-      title: "Online Course Creator",
-      image: "https://placehold.co/100x100/E2E8F0/4A5568?text=SL",
-    },
-  ];
+  
 
   const faqs = [
     {
