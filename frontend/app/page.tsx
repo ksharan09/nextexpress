@@ -449,7 +449,7 @@ export default function LandingPage() {
               href="#home"
               className="text-2xl font-bold transition-transform hover:scale-105"
             >
-              CourseHub
+              Quantum UI
             </a>
 
             {/* Desktop Nav (Centered) */}
@@ -498,7 +498,7 @@ export default function LandingPage() {
             <div className="fixed inset-0 z-50 flex flex-col bg-gradient-to-r from-blue-700 to-purple-800 p-4 text-white md:hidden">
               <div className="flex items-center justify-between">
                 <a href="#home" className="text-2xl font-bold">
-                  CourseHub
+                  Quantum UI
                 </a>
                 <button
                   onClick={() => setIsMenuOpen(false)}
@@ -744,10 +744,10 @@ export default function LandingPage() {
                   href="#home"
                   className="text-2xl font-bold text-white transition-colors hover:text-gray-100"
                 >
-                  CourseHub
+                  Quantum UI
                 </a>
                 <p className="mt-4 text-sm text-gray-300">
-                  &copy; {new Date().getFullYear()} CourseHub.
+                  &copy; {new Date().getFullYear()} Quantum UI.
                   All rights reserved.
                 </p>
                 <div className="mt-6 flex space-x-5">
